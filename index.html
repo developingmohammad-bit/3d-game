@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Pulse 4.0 | پاورآپ‌ها و مراحل جدید</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --neon-pink: #ff006e;
+    --neon-cyan: #00f5ff;
+    --neon-purple: #8338ec;
+    --neon-yellow: #ffbe0b;
+    --neon-green: #00ff00;
+    --neon-orange: #ff7b00;
+    --neon-blue: #0080ff;
+    --bg-dark: #05000a;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    overflow: hidden;
+    background: var(--bg-dark);
+    font-family: 'Rajdhani', sans-serif;
+    color: white;
+    user-select: none;
+    cursor: default;
+}
+
+#canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; }
+
+/* --- لودر --- */
+#loader-screen {
+    position: fixed; inset: 0; z-index: 1000;
+    background: radial-gradient(circle at center, #0a0014 0%, #05000a 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 0.8s ease;
+}
+#loader-screen.hidden { opacity: 0; pointer-events: none; }
+.loader-core { width: 40px; height: 40px; background: var(--neon-cyan); border-radius: 50%; box-shadow: 0 0 20px var(--neon-cyan); position: absolute; z-index: 2; animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.3); opacity: 1; } }
+.loader-ring { position: absolute; width: 80px; height: 80px; border: 2px solid transparent; border-top-color: var(--neon-pink); border-right-color: var(--neon-pink); border-radius: 50%; animation: spin 1.5s linear infinite; }
+.loader-ring:nth-child(2) { width: 120px; height: 120px; border-top-color: var(--neon-purple); border-left-color: var(--neon-purple); animation: spin 2s linear infinite reverse; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { margin-top: 100px; font-family: 'Orbitron', sans-serif; color: var(--neon-cyan); letter-spacing: 6px; text-shadow: 0 0 10px rgba(0, 245, 255, 0.8); animation: flicker 2s infinite alternate; font-size: 1.2rem; }
+@keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } 52% { opacity: 1; } }
+.loader-progress-container { width: 300px; height: 4px; background: #1a1a2e; margin-top: 30px; border-radius: 2px; overflow: hidden; border: 1px solid rgba(0, 245, 255, 0.2); }
+.loader-progress-bar { height: 100%; width: 0%; background: var(--neon-cyan); box-shadow: 0 0 15px var(--neon-cyan); transition: width 0.2s ease; }
+.loader-creator { position: absolute; bottom: 40px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.5); letter-spacing: 2px; }
+.loader-creator strong { color: var(--neon-pink); }
+
+/* --- منوها --- */
+.screen-overlay { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(ellipse at center, rgba(20, 0, 40, 0.95) 0%, rgba(5, 0, 10, 0.98) 100%); transition: opacity 0.6s ease; }
+.hidden { opacity: 0; pointer-events: none; }
+.title { font-family: 'Orbitron', sans-serif; font-size: clamp(3rem, 11vw, 7rem); font-weight: 900; background: linear-gradient(90deg, #ff006e, #00f5ff, #8338ec); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 0.08em; line-height: 1; filter: drop-shadow(0 0 20px rgba(255, 0, 110, 0.6)); margin-bottom: 1rem; }
+.subtitle { color: var(--neon-cyan); letter-spacing: 0.3em; margin-bottom: 3rem; text-transform: uppercase; font-size: 1.2rem; opacity: 0.9; }
+.instructions { background: rgba(10, 0, 20, 0.8); border: 1px solid rgba(0, 245, 255, 0.3); border-radius: 16px; padding: 1.5rem 2rem; margin-bottom: 2rem; backdrop-filter: blur(10px); width: 90%; max-width: 400px; }
+.instructions h3 { color: var(--neon-yellow); margin-bottom: 1rem; text-align: center; letter-spacing: 0.1em; }
+.key-grid { display: grid; grid-template-columns: auto 1fr; gap: 0.8rem 1rem; align-items: center; }
+.key { background: rgba(0, 245, 255, 0.1); border: 1px solid var(--neon-cyan); border-radius: 6px; padding: 0.3rem 0.8rem; font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-cyan); text-align: center; }
+.key-desc { color: #ddd; font-size: 1rem; }
+.btn-neon { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 700; color: white; background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple)); border: none; padding: 1rem 4rem; border-radius: 50px; cursor: pointer; letter-spacing: 0.2em; text-transform: uppercase; box-shadow: 0 0 30px rgba(255, 0, 110, 0.5); transition: all 0.3s ease; }
+.btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(255, 0, 110, 0.8); }
+.creator-credit { position: absolute; bottom: 25px; font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); letter-spacing: 2px; padding: 8px 20px; border: 1px solid rgba(0, 245, 255, 0.3); border-radius: 20px; background: rgba(0, 245, 255, 0.05); backdrop-filter: blur(5px); text-transform: uppercase; animation: creditFlicker 4s linear infinite; }
+.creator-credit strong { color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); font-weight: 700; }
+@keyframes creditFlicker { 0%, 100% { opacity: 0.8; box-shadow: 0 0 5px rgba(0, 245, 255, 0.2); } 50% { opacity: 1; box-shadow: 0 0 15px rgba(0, 245, 255, 0.5); } 52% { opacity: 0.4; } 54% { opacity: 1; } }
+
+/* --- HUD --- */
+#hud { position: fixed; top: 0; left: 0; width: 100%; padding: 1.2rem; display: none; justify-content: space-between; z-index: 50; pointer-events: none; }
+#hud.active { display: flex; }
+.hud-card { background: rgba(5, 0, 10, 0.7); border: 1px solid rgba(0, 245, 255, 0.3); border-radius: 10px; padding: 0.6rem 1.2rem; backdrop-filter: blur(10px); text-align: center; min-width: 100px; margin-bottom: 0.5rem; }
+.hud-label { font-size: 0.6rem; color: var(--neon-cyan); letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.8; }
+.hud-value { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 700; color: white; text-shadow: 0 0 10px rgba(0, 245, 255, 0.8); }
+.hud-value.score { color: var(--neon-yellow); text-shadow: 0 0 10px var(--neon-yellow); }
+.hud-value.time { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+.hud-value.level { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+
+#abilities { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; }
+.ability-icon { width: 40px; height: 40px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; backdrop-filter: blur(10px); transition: all 0.2s; opacity: 0.3; filter: grayscale(1); }
+.ability-icon.ready { opacity: 1; box-shadow: 0 0 15px currentColor; filter: none; }
+#dash-icon { color: var(--neon-pink); border-color: var(--neon-pink); }
+#jump-icon { color: var(--neon-cyan); border-color: var(--neon-cyan); }
+#speed-icon { color: var(--neon-orange); border-color: var(--neon-orange); }
+#shield-icon { color: var(--neon-blue); border-color: var(--neon-blue); }
+
+.toast { position: fixed; top: 100px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(255, 190, 11, 0.95); color: black; padding: 0.5rem 2rem; border-radius: 30px; font-weight: 700; z-index: 60; transition: transform 0.3s ease; box-shadow: 0 0 20px rgba(255, 190, 11, 0.5); white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.end-stats { display: flex; gap: 2rem; margin: 2rem 0; justify-content: center; }
+.stat { text-align: center; }
+.stat-label { font-size: 0.8rem; color: var(--neon-cyan); text-transform: uppercase; }
+.stat-value { font-family: 'Orbitron'; font-size: 2rem; color: var(--neon-yellow); }
+
+#touch-controls { position: fixed; bottom: 0; width: 100%; height: 200px; display: none; z-index: 50; pointer-events: none; }
+@media (hover: none) and (pointer: coarse) { #touch-controls { display: block; } }
+.joystick { position: absolute; bottom: 30px; left: 30px; width: 120px; height: 120px; border: 2px solid rgba(0, 245, 255, 0.5); border-radius: 50%; background: rgba(0, 245, 255, 0.1); pointer-events: auto; }
+.joystick-knob { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; border-radius: 50%; background: var(--neon-cyan); box-shadow: 0 0 15px var(--neon-cyan); }
+.touch-btn { position: absolute; bottom: 40px; width: 70px; height: 70px; border-radius: 50%; pointer-events: auto; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron'; border: 2px solid; }
+#jump-btn { right: 120px; background: rgba(0, 245, 255, 0.3); border-color: var(--neon-cyan); color: var(--neon-cyan); }
+#dash-btn { right: 30px; background: rgba(255, 0, 110, 0.3); border-color: var(--neon-pink); color: var(--neon-pink); }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="loader-screen">
+    <div class="loader-ring"></div><div class="loader-ring"></div><div class="loader-core"></div>
+    <h2 class="loader-text">INITIALIZING SYSTEM</h2>
+    <div class="loader-progress-container"><div class="loader-progress-bar" id="loader-bar"></div></div>
+    <div class="loader-creator">CRAFTED BY <strong>MOHAMMAD SOLEIMANI</strong></div>
+</div>
+
+<div id="hud">
+    <div>
+        <div class="hud-card"><div class="hud-label">مرحله</div><div class="hud-value level" id="level-value">1 / 5</div></div>
+        <div class="hud-card"><div class="hud-label">حلقه‌ها</div><div class="hud-value" id="rings-value">0 / 0</div></div>
+        <div class="hud-card"><div class="hud-label">امتیاز</div><div class="hud-value score" id="score-value">0</div></div>
+    </div>
+    <div>
+        <div class="hud-card"><div class="hud-label">زمان</div><div class="hud-value time" id="time-value">00:00</div></div>
+        <div id="abilities">
+            <div class="ability-icon" id="speed-icon">⚡</div>
+            <div class="ability-icon" id="shield-icon">🛡️</div>
+            <div class="ability-icon" id="jump-icon">↑</div>
+            <div class="ability-icon" id="dash-icon">⚡</div>
+        </div>
+    </div>
+</div>
+
+<div class="screen-overlay hidden" id="start-screen">
+    <h1 class="title">NEON PULSE</h1>
+    <p class="subtitle">نسخه ۴.۰ - پاورآپ‌ها</p>
+    <div class="instructions">
+        <h3>راهنمای کنترل</h3>
+        <div class="key-grid">
+            <div class="key">W A S D</div><div class="key-desc">حرکت (W=جلو، S=عقب، A=چپ، D=راست)</div>
+            <div class="key">SPACE</div><div class="key-desc">پرش (دو بار پشت سر هم برای پرش دوگانه)</div>
+            <div class="key">SHIFT</div><div class="key-desc">داش (شارژ نئونی)</div>
+            <div class="key">ماوس</div><div class="key-desc">کنترل دوربین (فقط حرکت موس)</div>
+        </div>
+    </div>
+    <button class="btn-neon" id="start-button">شروع بازی</button>
+    <div class="creator-credit">این بازی توسط <strong>محمد سلیمانی</strong> ساخته شده است</div>
+</div>
+
+<div class="screen-overlay hidden" id="end-screen">
+    <h1 class="title" id="end-title">پایان</h1>
+    <div class="end-stats">
+        <div class="stat"><div class="stat-label">امتیاز نهایی</div><div class="stat-value" id="end-score">0</div></div>
+        <div class="stat"><div class="stat-label">زمان</div><div class="stat-value" id="end-time">0s</div></div>
+    </div>
+    <button class="btn-neon" id="restart-button">بازی دوباره</button>
+    <div class="creator-credit">این بازی توسط <strong>محمد سلیمانی</strong> ساخته شده است</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="touch-controls">
+    <div class="joystick" id="joystick"><div class="joystick-knob" id="joystick-knob"></div></div>
+    <div class="touch-btn" id="jump-btn">پرش</div>
+    <div class="touch-btn" id="dash-btn">داش</div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+let scene, camera, renderer, composer, clock;
+let player, playerLight, playerTrail, playerCore, playerGlow;
+let platforms = [], rings = [], movingPlatforms = [], lasers = [], crystals = [], powerups = [], teleporters = [], orbs = [];
+let goalMesh, goalLight, creatorHologram;
+let gameState = 'menu', currentLevel = 0, collectedRings = 0, totalRings = 0, score = 0, startTime = 0, elapsedTime = 0;
+const keys = {};
+let toastTimer, isInitialized = false;
+
+const cameraAngle = { y: 0, x: 0.4 };
+let cameraShake = 0;
+const BASE_MOVE_SPEED = 10, JUMP_FORCE = 12, DASH_FORCE = 25, GRAVITY = -30;
+let canDoubleJump = false, dashCooldown = 0, isDashing = false;
+let speedBoostTime = 0, shieldTime = 0, teleportCooldown = 0;
+const playerVelocity = new THREE.Vector3();
+let onGround = false;
+
+const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+const camSettings = { sensitivity: 1.2, invertY: false, smooth: 0.12 };
+
+let audioCtx;
+function initAudio() { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+function playSound(freq, dur, type = 'sine', vol = 0.1) {
+    if (!audioCtx) return;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(freq * 0.5, audioCtx.currentTime + dur);
+    g.gain.setValueAtTime(vol, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + dur);
+}
+
+class ParticleSystem {
+    constructor(max) {
+        this.max = max; this.positions = new Float32Array(max * 3); this.colors = new Float32Array(max * 3);
+        this.opacities = new Float32Array(max); this.sizes = new Float32Array(max);
+        this.velocities = Array(max).fill().map(() => new THREE.Vector3());
+        this.lives = new Float32Array(max); this.maxLives = new Float32Array(max);
+        for(let i=0; i<max; i++) this.positions[i*3] = 99999;
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
+        geom.setAttribute('aColor', new THREE.BufferAttribute(this.colors, 3));
+        geom.setAttribute('aOpacity', new THREE.BufferAttribute(this.opacities, 1));
+        geom.setAttribute('size', new THREE.BufferAttribute(this.sizes, 1));
+        const mat = new THREE.ShaderMaterial({
+            vertexShader: `attribute float size; attribute float aOpacity; attribute vec3 aColor; varying vec3 vColor; varying float vOpacity; void main() { vColor = aColor; vOpacity = aOpacity; vec4 mvPosition = modelViewMatrix * vec4(position, 1.0); gl_PointSize = size * (300.0 / -mvPosition.z); gl_Position = projectionMatrix * mvPosition; }`,
+            fragmentShader: `varying vec3 vColor; varying float vOpacity; void main() { float d = length(gl_PointCoord - vec2(0.5)); if (d > 0.5) discard; gl_FragColor = vec4(vColor, vOpacity * (1.0 - d * 2.0)); }`,
+            transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+        });
+        this.points = new THREE.Points(geom, mat); scene.add(this.points); this.cursor = 0;
+    }
+    emit(pos, color, count, speed, life, size) {
+        for(let i=0; i<count; i++) {
+            const idx = this.cursor; this.cursor = (this.cursor + 1) % this.max;
+            this.positions[idx*3] = pos.x; this.positions[idx*3+1] = pos.y; this.positions[idx*3+2] = pos.z;
+            this.colors[idx*3] = color.r; this.colors[idx*3+1] = color.g; this.colors[idx*3+2] = color.b;
+            this.opacities[idx] = 1.0; this.sizes[idx] = size;
+            this.velocities[idx].set((Math.random()-0.5)*speed, (Math.random()-0.5)*speed+speed*0.2, (Math.random()-0.5)*speed);
+            this.lives[idx] = life; this.maxLives[idx] = life;
+        }
+    }
+    update(delta) {
+        for(let i=0; i<this.max; i++) {
+            if(this.lives[i] > 0) {
+                this.lives[i] -= delta; const ratio = Math.max(0, this.lives[i] / this.maxLives[i]);
+                this.positions[i*3] += this.velocities[i].x * delta; this.positions[i*3+1] += this.velocities[i].y * delta; this.positions[i*3+2] += this.velocities[i].z * delta;
+                this.velocities[i].y -= 10 * delta; this.velocities[i].multiplyScalar(0.96);
+                this.opacities[i] = ratio; this.sizes[i] *= 0.98;
+            } else { this.opacities[i] = 0; this.positions[i*3] = 99999; }
+        }
+        this.points.geometry.attributes.position.needsUpdate = true;
+        this.points.geometry.attributes.aOpacity.needsUpdate = true;
+        this.points.geometry.attributes.size.needsUpdate = true;
+    }
+}
+let particles;
+
+// تعریف ۵ مرحله (۳ قبلی + ۲ جدید با اشیاء جدید)
+const LEVELS = [
+    { 
+        bg: 0x05000a, start: {x:0, y:1, z:0},
+        platforms: [
+            { x: 0, y: 0, z: 0, w: 8, d: 8, c: 0x8338ec }, { x: 10, y: 0, z: 2, w: 5, d: 5, c: 0xff006e },
+            { x: 18, y: 1.5, z: -2, w: 4, d: 4, c: 0x00f5ff, move: {axis: 'y', range: 1.5, speed: 1.5} },
+            { x: 26, y: 0, z: 4, w: 4, d: 4, c: 0xff006e, move: {axis: 'x', range: 2, speed: 1} },
+            { x: 34, y: 0.5, z: 0, w: 5, d: 5, c: 0x00ff00, type: 'jumpPad' }, { x: 34, y: 6, z: 0, w: 4, d: 4, c: 0x8338ec }, 
+            { x: 42, y: 1, z: -3, w: 4, d: 4, c: 0x00f5ff, move: {axis: 'z', range: 2, speed: 1.2} },
+            { x: 50, y: 0, z: 0, w: 8, d: 8, c: 0xffbe0b }
+        ],
+        rings: [{x:4, y:2, z:0}, {x:12, y:2.5, z:1}, {x:18, y:4, z:-2}, {x:26, y:2.5, z:4}, {x:34, y:8, z:0}, {x:42, y:3.5, z:-3}, {x:50, y:2, z:0}],
+        crystals: [{x: 34, y: 9, z: 0}], lasers: [], powerups: [], teleporters: [], orbs: [],
+        goal: { x: 50, y: 0, z: 0 }
+    },
+    { 
+        bg: 0x000505, start: {x:0, y:1, z:0},
+        platforms: [
+            { x: 0, y: 0, z: 0, w: 6, d: 6, c: 0x8338ec }, { x: 8, y: 0, z: 0, w: 4, d: 4, c: 0xff8800, type: 'breakable' }, 
+            { x: 16, y: 1, z: 0, w: 5, d: 5, c: 0xff006e }, { x: 24, y: 0, z: 0, w: 4, d: 4, c: 0x00ff00, type: 'jumpPad' }, 
+            { x: 24, y: 6, z: 0, w: 4, d: 4, c: 0x00f5ff }, { x: 32, y: 2, z: 0, w: 3, d: 3, c: 0xff8800, type: 'breakable' },
+            { x: 40, y: 0, z: 0, w: 6, d: 6, c: 0xffbe0b }
+        ],
+        rings: [{x: 16, y: 2, z: 0}, {x: 24, y: 8, z: 0}, {x: 32, y: 3, z: 0}],
+        crystals: [{x: 24, y: 8, z: 2}],
+        lasers: [{x: 12, y: 1, z: 0, axis: 'z', range: 3, speed: 2}, {x: 36, y: 3, z: 0, axis: 'x', range: 2, speed: 2.5}],
+        powerups: [], teleporters: [], orbs: [], goal: { x: 40, y: 0, z: 0 }
+    },
+    { 
+        bg: 0x050000, start: {x:0, y:1, z:0},
+        platforms: [
+            { x: 0, y: 0, z: 0, w: 5, d: 5, c: 0x8338ec }, { x: 7, y: 2, z: 0, w: 3, d: 3, c: 0xff8800, type: 'breakable' },
+            { x: 14, y: 4, z: 0, w: 3, d: 3, c: 0xff8800, type: 'breakable' }, { x: 21, y: 6, z: 0, w: 4, d: 4, c: 0x00f5ff },
+            { x: 30, y: 6, z: 0, w: 4, d: 4, c: 0xff006e, move: {axis: 'z', range: 3, speed: 1.5} },
+            { x: 38, y: 4, z: 0, w: 3, d: 3, c: 0x00ff00, type: 'jumpPad' }, { x: 46, y: 10, z: 0, w: 5, d: 5, c: 0xffbe0b }
+        ],
+        rings: [{x: 7, y: 3, z: 0}, {x: 14, y: 5, z: 0}, {x: 21, y: 7, z: 0}, {x: 30, y: 7, z: 0}, {x: 46, y: 11, z: 0}],
+        crystals: [{x: 21, y: 8, z: 2}, {x: 30, y: 8, z: -2}],
+        lasers: [{x: 25, y: 7, z: 0, axis: 'x', range: 2, speed: 3}, {x: 34, y: 5, z: 0, axis: 'z', range: 2, speed: 2.5}],
+        powerups: [], teleporters: [], orbs: [], goal: { x: 46, y: 10, z: 0 }
+    },
+    // --- مرحله ۴ جدید: استفاده از تلپورت و سرعت ---
+    { 
+        bg: 0x050012, start: {x:0, y:1, z:0},
+        platforms: [
+            { x: 0, y: 0, z: 0, w: 5, d: 5, c: 0x8338ec }, 
+            { x: 8, y: 0, z: 0, w: 3, d: 3, c: 0x00f5ff }, // تلپورت ورودی
+            { x: 25, y: 5, z: -10, w: 3, d: 3, c: 0x00f5ff }, // تلپورت خروجی
+            { x: 30, y: 5, z: -15, w: 4, d: 4, c: 0xff006e },
+            { x: 38, y: 5, z: -15, w: 4, d: 4, c: 0x00ff00, type: 'jumpPad' }, 
+            { x: 45, y: 10, z: -15, w: 4, d: 4, c: 0x8338ec },
+            { x: 55, y: 10, z: -15, w: 6, d: 6, c: 0xffbe0b }
+        ],
+        rings: [{x: 25, y: 6, z: -10}, {x: 38, y: 6, z: -15}, {x: 45, y: 11, z: -15}],
+        crystals: [],
+        lasers: [{x: 48, y: 11, z: -15, axis: 'z', range: 2, speed: 2}],
+        powerups: [{type: 'speed', x: 30, y: 6, z: -15}], // پاورآپ سرعت
+        teleporters: [{x: 8, y: 0, z: 0, target: {x: 25, y: 5, z: -10}}], // تلپورت
+        orbs: [{x: 50, y: 11, z: -15, axis: 'x', range: 3, speed: 2}], // گوی خطرناک
+        goal: { x: 55, y: 10, z: -15 }
+    },
+    // --- مرحله ۵ جدید: گوی‌های پلاسما و سپر محافظ ---
+    { 
+        bg: 0x120005, start: {x:0, y:1, z:0},
+        platforms: [
+            { x: 0, y: 0, z: 0, w: 5, d: 5, c: 0x8338ec }, 
+            { x: 8, y: 2, z: 0, w: 3, d: 3, c: 0xff8800, type: 'breakable' },
+            { x: 16, y: 2, z: 0, w: 4, d: 4, c: 0xff006e },
+            { x: 24, y: 2, z: 0, w: 4, d: 4, c: 0xff8800, type: 'breakable' },
+            { x: 32, y: 2, z: 0, w: 4, d: 4, c: 0x8338ec },
+            { x: 40, y: 5, z: 0, w: 4, d: 4, c: 0x00ff00, type: 'jumpPad' },
+            { x: 48, y: 12, z: 0, w: 6, d: 6, c: 0xffbe0b }
+        ],
+        rings: [{x: 8, y: 3, z: 0}, {x: 16, y: 3, z: 0}, {x: 24, y: 3, z: 0}, {x: 32, y: 3, z: 0}, {x: 40, y: 6, z: 0}],
+        crystals: [{x: 48, y: 13, z: 2}],
+        lasers: [{x: 20, y: 3, z: 0, axis: 'z', range: 4, speed: 3}],
+        powerups: [{type: 'shield', x: 16, y: 3, z: 2}], // پاورآپ سپر
+        teleporters: [],
+        orbs: [
+            {x: 12, y: 3, z: 0, axis: 'x', range: 2, speed: 2}, 
+            {x: 28, y: 3, z: 0, axis: 'z', range: 2, speed: 2.5},
+            {x: 36, y: 3, z: 0, axis: 'x', range: 2, speed: 3}
+        ],
+        goal: { x: 48, y: 12, z: 0 }
+    }
+];
+
+function runLoader() {
+    let progress = 0; const bar = document.getElementById('loader-bar');
+    const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress > 90 && !isInitialized) progress = 90;
+        if (progress >= 100) {
+            progress = 100; bar.style.width = '100%'; clearInterval(interval);
+            setTimeout(() => { document.getElementById('loader-screen').classList.add('hidden'); document.getElementById('start-screen').classList.remove('hidden'); }, 600);
+            return;
+        }
+        bar.style.width = progress + '%';
+    }, 150);
+}
+
+function init() {
+    scene = new THREE.Scene(); scene.background = new THREE.Color(0x05000a); scene.fog = new THREE.FogExp2(0x05000a, 0.025);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 200);
+    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; document.getElementById('canvas-container').appendChild(renderer.domElement);
+    composer = new EffectComposer(renderer); composer.addPass(new RenderPass(scene, camera));
+    composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.6, 0.8));
+    composer.addPass(new OutputPass());
+    scene.add(new THREE.AmbientLight(0x444466, 0.5));
+    const l1 = new THREE.DirectionalLight(0xff006e, 0.8); l1.position.set(20, 30, 10); scene.add(l1);
+    const l2 = new THREE.DirectionalLight(0x00f5ff, 0.6); l2.position.set(-20, 20, -10); scene.add(l2);
+    particles = new ParticleSystem(500);
+    createPlayer(); createCreatorHologram(); setupEvents(); clock = new THREE.Clock(); animate();
+    isInitialized = true;
+}
+
+function createCreatorHologram() {
+    const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 256; const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, 512, 256); ctx.font = 'bold 40px Tahoma, sans-serif'; ctx.textAlign = 'center';
+    ctx.shadowColor = '#00f5ff'; ctx.shadowBlur = 20; ctx.fillStyle = '#00f5ff'; ctx.fillText('این بازی توسط', 256, 80);
+    ctx.font = 'bold 70px Tahoma, sans-serif'; ctx.shadowColor = '#ff006e'; ctx.shadowBlur = 30; ctx.fillStyle = '#ff006e'; ctx.fillText('محمد سلیمانی', 256, 170);
+    ctx.font = 'bold 36px Tahoma, sans-serif'; ctx.shadowColor = '#ffbe0b'; ctx.shadowBlur = 15; ctx.fillStyle = '#ffbe0b'; ctx.fillText('ساخته شده است', 256, 225);
+    const texture = new THREE.CanvasTexture(canvas);
+    const mat = new THREE.MeshBasicMaterial({ map: texture, transparent: true, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, depthWrite: false });
+    creatorHologram = new THREE.Mesh(new THREE.PlaneGeometry(4, 2), mat); creatorHologram.position.set(-4, 3, 3); scene.add(creatorHologram);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.5, 6, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0x00f5ff, transparent: true, opacity: 0.2, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false }));
+    beam.position.set(-4, 0, 3); scene.add(beam); scene.add(new THREE.PointLight(0x00f5ff, 1.5, 8));
+}
+
+function createPlayer() {
+    player = new THREE.Group();
+    playerCore = new THREE.Mesh(new THREE.IcosahedronGeometry(0.6, 1), new THREE.MeshStandardMaterial({ color: 0x00f5ff, emissive: 0x00f5ff, emissiveIntensity: 2, metalness: 0.8, roughness: 0.2 }));
+    player.add(playerCore);
+    playerGlow = new THREE.Mesh(new THREE.SphereGeometry(0.9, 16, 16), new THREE.MeshBasicMaterial({ color: 0x00f5ff, transparent: true, opacity: 0.2, side: THREE.BackSide }));
+    player.add(playerGlow);
+    const trailGeo = new THREE.BufferGeometry(); const trailPositions = new Float32Array(30 * 3);
+    trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+    playerTrail = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ color: 0x00f5ff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending }));
+    scene.add(playerTrail); playerLight = new THREE.PointLight(0x00f5ff, 3, 15); player.add(playerLight);
+    player.position.set(0, 1, 0); scene.add(player);
+}
+
+function clearLevel() {
+    [platforms, rings, lasers, crystals, movingPlatforms, powerups, teleporters, orbs].forEach(arr => {
+        arr.forEach(obj => { scene.remove(obj); if (obj.geometry) obj.geometry.dispose(); if (obj.material) obj.material.dispose(); });
+        arr.length = 0;
+    });
+    if (goalMesh) { scene.remove(goalMesh); goalMesh.geometry.dispose(); goalMesh.material.dispose(); }
+    if (goalLight) scene.remove(goalLight);
+}
+
+function loadLevel(index) {
+    clearLevel(); const LVL = LEVELS[index]; scene.background = new THREE.Color(LVL.bg); scene.fog = new THREE.FogExp2(LVL.bg, 0.025);
+    if (creatorHologram) creatorHologram.visible = (index === 0);
+
+    LVL.platforms.forEach(p => {
+        let geo = p.type === 'jumpPad' ? new THREE.CylinderGeometry(p.w/2, p.w/2, 0.3, 16) : new THREE.BoxGeometry(p.w, 0.3, p.d);
+        const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: p.c, emissive: p.c, emissiveIntensity: 0.4, metalness: 0.7, roughness: 0.3 }));
+        mesh.position.set(p.x, p.y, p.z); mesh.userData = { ...p, isPlatform: true, baseY: p.y, touchTime: 0, broken: false, respawnTime: 0 };
+        platforms.push(mesh); scene.add(mesh);
+        const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: p.c })); edges.position.copy(mesh.position); scene.add(edges);
+        if (p.move) movingPlatforms.push(mesh);
+        if (p.type !== 'jumpPad') { const base = new THREE.Mesh(new THREE.BoxGeometry(p.w*0.8, 10, p.d*0.8), new THREE.MeshStandardMaterial({ color: 0x110022 })); base.position.set(p.x, p.y - 5, p.z); scene.add(base); }
+    });
+
+    LVL.rings.forEach(r => { const g = new THREE.Group(); const t1 = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.08, 8, 24), new THREE.MeshStandardMaterial({ color: 0xffbe0b, emissive: 0xffbe0b, emissiveIntensity: 2 })); g.add(t1); g.position.set(r.x, r.y, r.z); g.userData = { collected: false, baseY: r.y, ring: t1 }; rings.push(g); scene.add(g); });
+    totalRings = LVL.rings.length;
+
+    LVL.crystals.forEach(c => { const mesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.5), new THREE.MeshStandardMaterial({ color: 0xff00ff, emissive: 0xff00ff, emissiveIntensity: 2 })); mesh.position.set(c.x, c.y, c.z); mesh.userData = { collected: false, baseY: c.y }; crystals.push(mesh); scene.add(mesh); });
+
+    LVL.lasers.forEach(l => { const mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4, 8), new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 2.5 })); mesh.position.set(l.x, l.y, l.z); mesh.userData = { ...l, baseX: l.x, baseZ: l.z }; lasers.push(mesh); scene.add(mesh); mesh.add(new THREE.PointLight(0xff0000, 1, 5)); });
+    
+    // ساخت پاورآپ‌ها
+    LVL.powerups.forEach(p => {
+        let color = p.type === 'speed' ? 0xff7b00 : 0x0080ff;
+        const mesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.4), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 2 }));
+        mesh.position.set(p.x, p.y, p.z); mesh.userData = { collected: false, baseY: p.y, type: p.type };
+        powerups.push(mesh); scene.add(mesh);
+    });
+
+    // ساخت تلپورت‌ها
+    LVL.teleporters.forEach(t => {
+        const mesh = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.2, 16), new THREE.MeshBasicMaterial({ color: 0x00f5ff, transparent: true, opacity: 0.5 }));
+        mesh.position.set(t.x, t.y + 0.1, t.z); mesh.userData = { isTeleporter: true, target: t.target };
+        teleporters.push(mesh); scene.add(mesh);
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.1, 8, 24), new THREE.MeshStandardMaterial({ color: 0x8338ec, emissive: 0x8338ec, emissiveIntensity: 2 }));
+        ring.position.set(t.x, t.y + 0.1, t.z); ring.rotation.x = Math.PI / 2; scene.add(ring);
+    });
+
+    // ساخت گوی‌های پلاسما
+    LVL.orbs.forEach(o => {
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 2.5 }));
+        mesh.position.set(o.x, o.y, o.z); mesh.userData = { ...o, baseX: o.x, baseZ: o.z };
+        orbs.push(mesh); scene.add(mesh); mesh.add(new THREE.PointLight(0xff0000, 1.5, 4));
+    });
+
+    goalMesh = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.3, 32), new THREE.MeshStandardMaterial({ color: 0xffbe0b, emissive: 0xffbe0b, emissiveIntensity: 1.5 }));
+    goalMesh.position.set(LVL.goal.x, LVL.goal.y + 0.15, LVL.goal.z); scene.add(goalMesh);
+    goalLight = new THREE.PointLight(0xffbe0b, 3, 20); goalLight.position.set(LVL.goal.x, LVL.goal.y + 2, LVL.goal.z); scene.add(goalLight);
+
+    player.position.set(LVL.start.x, LVL.start.y, LVL.start.z); playerVelocity.set(0, 0, 0); collectedRings = 0;
+    cameraAngle.y = 0; cameraAngle.x = 0.4; mouse.x = 0; mouse.y = 0; mouse.targetX = 0; mouse.targetY = 0;
+    speedBoostTime = 0; shieldTime = 0;
+    document.getElementById('level-value').textContent = `${index + 1} / ${LEVELS.length}`; updateHUD();
+}
+
+function setupEvents() {
+    window.addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault(); });
+    window.addEventListener('keyup', e => { keys[e.code] = false; });
+    document.addEventListener('mousemove', (e) => { if (gameState !== 'playing') return; mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1; mouse.targetY = (e.clientY / window.innerHeight) * 2 - 1; });
+    window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); composer.setSize(window.innerWidth, window.innerHeight); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && gameState === 'playing') startTime += performance.now() - (startTime + elapsedTime * 1000); });
+    document.getElementById('start-button').onclick = startGame; document.getElementById('restart-button').onclick = startGame;
+    const joystick = document.getElementById('joystick'), knob = document.getElementById('joystick-knob'); let joyStart = {x:0, y:0};
+    joystick.addEventListener('touchstart', e => { e.preventDefault(); const r = joystick.getBoundingClientRect(); joyStart = {x: r.left+r.width/2, y: r.top+r.height/2}; });
+    joystick.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; let dx = t.clientX - joyStart.x, dy = t.clientY - joyStart.y; const d = Math.min(45, Math.hypot(dx, dy)), a = Math.atan2(dy, dx); knob.style.transform = `translate(${Math.cos(a)*d}px, ${Math.sin(a)*d}px)`; keys.joyX = Math.cos(a) * (d/45); keys.joyY = Math.sin(a) * (d/45); });
+    joystick.addEventListener('touchend', e => { e.preventDefault(); knob.style.transform = 'translate(0,0)'; keys.joyX = 0; keys.joyY = 0; });
+    document.getElementById('jump-btn').addEventListener('touchstart', e => { e.preventDefault(); keys['Space'] = true; });
+    document.getElementById('jump-btn').addEventListener('touchend', e => { e.preventDefault(); keys['Space'] = false; });
+    document.getElementById('dash-btn').addEventListener('touchstart', e => { e.preventDefault(); keys['ShiftLeft'] = true; });
+    document.getElementById('dash-btn').addEventListener('touchend', e => { e.preventDefault(); keys['ShiftLeft'] = false; });
+}
+
+function startGame() { if (!audioCtx) initAudio(); currentLevel = 0; score = 0; loadLevel(0); gameState = 'playing'; document.getElementById('start-screen').classList.add('hidden'); document.getElementById('end-screen').classList.add('hidden'); document.getElementById('hud').classList.add('active'); startTime = performance.now(); dashCooldown = 0; cameraShake = 0; }
+function endGame(won) { gameState = 'ended'; document.getElementById('end-title').textContent = won ? 'برد تمام مراحل!' : 'باختی!'; document.getElementById('end-score').textContent = score; document.getElementById('end-time').textContent = formatTime(elapsedTime); document.getElementById('end-screen').classList.remove('hidden'); }
+function formatTime(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${Math.floor(s%60).toString().padStart(2,'0')}`; }
+function updateHUD() {
+    document.getElementById('rings-value').textContent = `${collectedRings} / ${totalRings}`;
+    document.getElementById('score-value').textContent = score;
+    document.getElementById('time-value').textContent = formatTime(elapsedTime);
+    document.getElementById('dash-icon').className = dashCooldown <= 0 ? 'ability-icon ready' : 'ability-icon';
+    document.getElementById('speed-icon').className = speedBoostTime > 0 ? 'ability-icon ready' : 'ability-icon';
+    document.getElementById('shield-icon').className = shieldTime > 0 ? 'ability-icon ready' : 'ability-icon';
+}
+
+function respawnPlayer() { const LVL = LEVELS[currentLevel]; player.position.set(LVL.start.x, LVL.start.y, LVL.start.z); playerVelocity.set(0,0,0); cameraShake = 0.6; playSound(100, 0.4, 'sawtooth', 0.2); particles.emit(player.position, new THREE.Color(0xff0000), 40, 15, 0.8, 2); score = Math.max(0, score - 100); }
+
+function updatePlayer(delta) {
+    // مدیریت تایمرهای پاورآپ
+    if (speedBoostTime > 0) speedBoostTime -= delta;
+    if (shieldTime > 0) { shieldTime -= delta; playerGlow.material.color.setHex(0x0080ff); playerGlow.material.opacity = 0.4; } 
+    else { playerGlow.material.color.setHex(0x00f5ff); playerGlow.material.opacity = 0.2; }
+    if (teleportCooldown > 0) teleportCooldown -= delta;
+
+    const currentSpeed = (speedBoostTime > 0 ? BASE_MOVE_SPEED * 1.8 : BASE_MOVE_SPEED) * (isDashing ? 2.5 : 1);
+    const forward = new THREE.Vector3(Math.sin(cameraAngle.y), 0, Math.cos(cameraAngle.y));
+    const right = new THREE.Vector3(Math.cos(cameraAngle.y), 0, -Math.sin(cameraAngle.y));
+    let moveX = 0, moveZ = 0;
+    if (keys['KeyW'] || keys['ArrowUp']) { moveX += forward.x; moveZ += forward.z; }
+    if (keys['KeyS'] || keys['ArrowDown']) { moveX -= forward.x; moveZ -= forward.z; }
+    if (keys['KeyA'] || keys['ArrowLeft']) { moveX += right.x; moveZ += right.z; }
+    if (keys['KeyD'] || keys['ArrowRight']) { moveX -= right.x; moveZ -= right.z; }
+    if (keys.joyX || keys.joyY) { moveX += right.x * keys.joyX + forward.x * -keys.joyY; moveZ += right.z * keys.joyX + forward.z * -keys.joyY; }
+    const len = Math.hypot(moveX, moveZ);
+    if (len > 0) { moveX = (moveX/len) * currentSpeed; moveZ = (moveZ/len) * currentSpeed; }
+    
+    if (keys['ShiftLeft'] && dashCooldown <= 0 && len > 0) { isDashing = true; dashCooldown = 1.5; cameraShake = 0.5; playSound(150, 0.2, 'sawtooth', 0.2); particles.emit(player.position, new THREE.Color(0xff006e), 30, 15, 0.5, 2); }
+    if (isDashing) { dashCooldown -= delta; if (dashCooldown < 1.3) isDashing = false; particles.emit(player.position, new THREE.Color(0x00f5ff), 5, 5, 0.3, 1.5); } 
+    else { dashCooldown = Math.max(0, dashCooldown - delta); playerVelocity.x = moveX; playerVelocity.z = moveZ; }
+
+    if (keys['Space']) {
+        if (onGround) { playerVelocity.y = JUMP_FORCE; canDoubleJump = true; onGround = false; playSound(400, 0.1, 'square', 0.1); particles.emit(player.position, new THREE.Color(0x00f5ff), 15, 8, 0.4, 1.5); } 
+        else if (canDoubleJump) { playerVelocity.y = JUMP_FORCE * 0.9; canDoubleJump = false; playSound(600, 0.1, 'square', 0.1); particles.emit(player.position, new THREE.Color(0xff006e), 25, 12, 0.5, 2); }
+        keys['Space'] = false;
+    }
+
+    playerVelocity.y += GRAVITY * delta; player.position.addScaledVector(playerVelocity, delta);
+    playerCore.rotation.x += delta * 5 * (playerVelocity.z > 0 ? 1 : -1); playerCore.rotation.z -= delta * 5 * (playerVelocity.x > 0 ? 1 : -1);
+
+    const trailPos = playerTrail.geometry.attributes.position.array;
+    for (let i = 29; i > 0; i--) { trailPos[i*3] = trailPos[(i-1)*3]; trailPos[i*3+1] = trailPos[(i-1)*3+1]; trailPos[i*3+2] = trailPos[(i-1)*3+2]; }
+    trailPos[0] = player.position.x; trailPos[1] = player.position.y; trailPos[2] = player.position.z;
+    playerTrail.geometry.attributes.position.needsUpdate = true;
+
+    onGround = false;
+    for (let p of platforms) {
+        if (p.userData.broken) continue;
+        const halfW = p.userData.w/2 + 0.5, halfD = p.userData.d/2 + 0.5, topY = p.position.y + 0.15;
+        if (Math.abs(player.position.x - p.position.x) < halfW && Math.abs(player.position.z - p.position.z) < halfD) {
+            if (player.position.y <= topY + 0.6 && player.position.y >= topY - 0.5 && playerVelocity.y <= 0) {
+                if (p.userData.type === 'jumpPad') { playerVelocity.y = 20; canDoubleJump = true; player.position.y = topY + 0.6; playSound(800, 0.2, 'sine', 0.15); particles.emit(player.position, new THREE.Color(0x00ff00), 30, 10, 0.5, 2); } 
+                else {
+                    if (!onGround && playerVelocity.y < -10) { cameraShake = 0.2; particles.emit(player.position, new THREE.Color(0xffffff), 10, 6, 0.3, 1); }
+                    player.position.y = topY + 0.6; playerVelocity.y = 0; onGround = true;
+                    if (p.userData.type === 'breakable' && p.userData.touchTime === 0) p.userData.touchTime = 1.0;
+                }
+            }
+        }
+    }
+
+    if (player.position.y < -30) respawnPlayer();
+    
+    const dGoal = Math.hypot(player.position.x - LEVELS[currentLevel].goal.x, player.position.z - LEVELS[currentLevel].goal.z);
+    if (dGoal < 2.5 && Math.abs(player.position.y - LEVELS[currentLevel].goal.y) < 2) {
+        score += 1000; particles.emit(goalMesh.position, new THREE.Color(0xffbe0b), 100, 20, 1.5, 3); playSound(800, 0.5, 'sine', 0.2);
+        if (currentLevel < LEVELS.length - 1) {
+            gameState = 'transition'; const toast = document.getElementById('toast');
+            toast.textContent = `مرحله ${currentLevel + 2} در حال بارگذاری...`; toast.classList.add('show'); clearTimeout(toastTimer);
+            setTimeout(() => { currentLevel++; loadLevel(currentLevel); toast.classList.remove('show'); gameState = 'playing'; }, 1500);
+        } else { endGame(true); }
+    }
+}
+
+function updateWorld(delta) {
+    if (creatorHologram && creatorHologram.visible) { creatorHologram.rotation.y += delta * 0.5; creatorHologram.position.y = 3 + Math.sin(clock.elapsedTime * 1.5) * 0.2; }
+
+    rings.forEach(r => { if (r.userData.collected) return; r.userData.ring.rotation.z += 0.05; r.rotation.y += delta * 0.5; r.position.y = r.userData.baseY + Math.sin(clock.elapsedTime * 2) * 0.3; if (r.position.distanceTo(player.position) < 1.5) { r.userData.collected = true; r.visible = false; collectedRings++; score += 100; playSound(1000, 0.1, 'sine', 0.15); particles.emit(r.position, new THREE.Color(0xffbe0b), 30, 10, 0.6, 2); const toast = document.getElementById('toast'); toast.textContent = `+100 | ${collectedRings}/${totalRings}`; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 1000); } });
+
+    crystals.forEach(c => { if (c.userData.collected) return; c.rotation.y += delta * 2; c.position.y = c.userData.baseY + Math.sin(clock.elapsedTime * 2) * 0.2; if (c.position.distanceTo(player.position) < 1.5) { c.userData.collected = true; c.visible = false; score += 500; playSound(1200, 0.2, 'triangle', 0.15); particles.emit(c.position, new THREE.Color(0xff00ff), 40, 12, 0.8, 2.5); } });
+
+    // پاورآپ‌ها
+    powerups.forEach(p => {
+        if (p.userData.collected) return;
+        p.rotation.y += delta * 2; p.rotation.x += delta * 1.5;
+        p.position.y = p.userData.baseY + Math.sin(clock.elapsedTime * 3) * 0.3;
+        if (p.position.distanceTo(player.position) < 1.5) {
+            p.userData.collected = true; p.visible = false;
+            if (p.userData.type === 'speed') { speedBoostTime = 5; playSound(800, 0.3, 'sawtooth', 0.2); particles.emit(p.position, new THREE.Color(0xff7b00), 40, 12, 0.8, 2.5); showToast("شارژ نیترو فعال شد!"); }
+            else if (p.userData.type === 'shield') { shieldTime = 8; playSound(600, 0.4, 'sine', 0.2); particles.emit(p.position, new THREE.Color(0x0080ff), 40, 12, 0.8, 2.5); showToast("سپر محافظ فعال شد!"); }
+        }
+    });
+
+    // تلپورت‌ها
+    teleporters.forEach(t => {
+        t.rotation.y += delta * 2;
+        if (teleportCooldown <= 0 && Math.abs(player.position.x - t.position.x) < 1.5 && Math.abs(player.position.z - t.position.z) < 1.5 && Math.abs(player.position.y - t.position.y) < 1.5) {
+            player.position.set(t.userData.target.x, t.userData.target.y + 1, t.userData.target.z);
+            teleportCooldown = 1.5; cameraShake = 0.3; playSound(1200, 0.2, 'sine', 0.15);
+            particles.emit(player.position, new THREE.Color(0x00f5ff), 30, 10, 0.5, 2);
+        }
+    });
+
+    // گوی‌های پلاسمای خطرناک
+    orbs.forEach(o => {
+        const l = o.userData;
+        if (l.axis === 'x') o.position.x = l.baseX + Math.sin(clock.elapsedTime * l.speed) * l.range;
+        else if (l.axis === 'z') o.position.z = l.baseZ + Math.sin(clock.elapsedTime * l.speed) * l.range;
+        
+        if (player.position.distanceTo(o.position) < 1.2) {
+            if (shieldTime > 0) { shieldTime = 0; o.visible = false; playSound(200, 0.3, 'square', 0.2); particles.emit(o.position, new THREE.Color(0x0080ff), 30, 10, 0.5, 2); showToast("سپر شما متلاشی شد!"); }
+            else { respawnPlayer(); }
+        }
+    });
+
+    lasers.forEach(laser => { const l = laser.userData; if (l.axis === 'x') laser.position.x = l.baseX + Math.sin(clock.elapsedTime * l.speed) * l.range; else if (l.axis === 'z') laser.position.z = l.baseZ + Math.sin(clock.elapsedTime * l.speed) * l.range; if (player.position.distanceTo(laser.position) < 1.2) { if (shieldTime > 0) { shieldTime = 0; playSound(200, 0.3, 'square', 0.2); particles.emit(laser.position, new THREE.Color(0x0080ff), 30, 10, 0.5, 2); showToast("سپر شما متلاشی شد!"); } else { respawnPlayer(); } } });
+
+    movingPlatforms.forEach(p => { const m = p.userData.move; const offset = Math.sin(clock.elapsedTime * m.speed) * m.range; const prevPos = p.position[m.axis]; p.position[m.axis] = p.userData[m.axis] + offset; const deltaMove = p.position[m.axis] - prevPos; if (onGround && Math.abs(player.position.x - p.position.x) < p.userData.w/2+0.5 && Math.abs(player.position.z - p.position.z) < p.userData.d/2+0.5) player.position[m.axis] += deltaMove; });
+
+    platforms.forEach(p => { if (p.userData.type === 'breakable') { if (p.userData.touchTime > 0) { p.userData.touchTime -= delta; p.position.y = p.userData.baseY + Math.sin(performance.now() * 0.05) * 0.1; if (p.userData.touchTime <= 0) { p.userData.broken = true; p.visible = false; p.userData.respawnTime = 3.0; particles.emit(p.position, new THREE.Color(0xff8800), 20, 8, 0.5, 1.5); } } else if (p.userData.broken) { p.userData.respawnTime -= delta; if (p.userData.respawnTime <= 0) { p.userData.broken = false; p.visible = true; p.userData.touchTime = 0; p.position.y = p.userData.baseY; } } } });
+
+    goalMesh.rotation.y += delta * 0.5; goalLight.intensity = 3 + Math.sin(clock.elapsedTime * 5) * 1;
+}
+
+function showToast(msg) { const toast = document.getElementById('toast'); toast.textContent = msg; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 1500); }
+
+function updateCamera(delta) {
+    mouse.x += (mouse.targetX - mouse.x) * camSettings.smooth; mouse.y += (mouse.targetY - mouse.y) * camSettings.smooth;
+    cameraAngle.y = -mouse.x * Math.PI * camSettings.sensitivity; const yInfluence = camSettings.invertY ? -mouse.y : mouse.y;
+    cameraAngle.x = 0.4 + yInfluence * 0.8 * camSettings.sensitivity; cameraAngle.x = Math.max(0.1, Math.min(1.4, cameraAngle.x));
+    const dist = 7, height = 2.5;
+    const targetX = player.position.x - Math.sin(cameraAngle.y) * dist * Math.cos(cameraAngle.x);
+    const targetY = player.position.y + height + Math.sin(cameraAngle.x) * dist;
+    const targetZ = player.position.z - Math.cos(cameraAngle.y) * dist * Math.cos(cameraAngle.x);
+    camera.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.15);
+    if (cameraShake > 0) { camera.position.x += (Math.random() - 0.5) * cameraShake; camera.position.y += (Math.random() - 0.5) * cameraShake; cameraShake = Math.max(0, cameraShake - delta * 2); }
+    camera.lookAt(player.position.x, player.position.y + 0.5, player.position.z);
+}
+
+function animate() {
+    requestAnimationFrame(animate); const delta = Math.min(clock.getDelta(), 0.05);
+    if (gameState === 'playing') { elapsedTime = (performance.now() - startTime) / 1000; updatePlayer(delta); updateWorld(delta); updateHUD(); }
+    particles.update(delta); if (gameState === 'playing' || gameState === 'transition') updateCamera(delta);
+    composer.render();
+}
+
+runLoader(); setTimeout(() => { init(); }, 100);
+</script>
+</body>
+</html>
